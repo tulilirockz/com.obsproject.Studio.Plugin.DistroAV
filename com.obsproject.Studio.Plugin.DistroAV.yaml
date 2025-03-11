@@ -1,0 +1,33 @@
+id: com.obsproject.Studio.Plugin.DistroAV
+branch: stable
+runtime: com.obsproject.Studio
+runtime-version: stable
+sdk: org.kde.Sdk//6.6
+build-extension: true
+separate-locales: false
+build-options:
+  prefix: /app/plugins/DistroAV
+  strip: true
+
+modules:
+  - name: distroav-plugin
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DENABLE_FRONTEND_API=on
+      - -DENABLE_QT=on
+      - --compile-no-warning-as-error
+    sources:
+      - type: archive
+        url: https://github.com/DistroAV/DistroAV/archive/refs/tags/6.0.0.tar.gz
+        sha256: 413d92d663dc58b38b450fc9588ded92c80076180b3628f824e2b53cbbc1cbaa
+      - type: patch
+        path: use-new-api-obs-31.patch
+  - name: metadata
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 ${FLATPAK_ID}.metainfo.xml -t ${FLATPAK_DEST}/share/metainfo
+    sources:
+      - type: file
+        path: com.obsproject.Studio.Plugin.DistroAV.metainfo.xml
