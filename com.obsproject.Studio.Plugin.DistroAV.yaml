@@ -10,6 +10,7 @@ build-options:
   strip: true
 
 modules:
+  - ndi-sdk.json
   - name: distroav-plugin
     buildsystem: cmake-ninja
     builddir: true
