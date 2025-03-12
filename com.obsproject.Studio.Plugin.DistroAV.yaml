@@ -24,6 +24,45 @@ modules:
         sha256: 413d92d663dc58b38b450fc9588ded92c80076180b3628f824e2b53cbbc1cbaa
       - type: patch
         path: use-new-api-obs-31.patch
+      - type: extra-data
+        filename: Install_NDI_SDK_v5_Linux.tar.gz
+        url: https://downloads.ndi.tv/SDK/NDI_SDK_Linux/Install_NDI_SDK_v5_Linux.tar.gz
+        sha256: 1cfcc32ee26bc2571c5cbf71e81dafc676e3887e5724a89ce508f49e3c5e0572
+        size: 53865049
+      - type: script
+        dest-filename: apply_extra
+        commands:
+          - |
+            tar -xvf Install_NDI_SDK_v5_Linux.tar.gz
+            ARCHIVE=$(awk '/^__NDI_ARCHIVE_BEGIN__/ { print NR+1; exit 0; }' Install_NDI_SDK_v5_Linux.sh)
+            tail -n+$ARCHIVE Install_NDI_SDK_v5_Linux.sh | tar -xz
+            mv 'NDI SDK for Linux'/* .
+
+            _arch=$(uname -m)
+
+            case ${_arch} in
+              aarch64)
+                _ndi_arch="aarch64-rpi4-linux-gnueabi"
+                ;;
+              armv7l)
+                _ndi_arch="arm-rpi3-linux-gnueabihf"
+                ;;
+              i386)
+                _ndi_arch=i686-linux-gnu
+                ;;
+              i686|x86_64)
+                _ndi_arch=${_arch}-linux-gnu
+                ;;
+              *)
+                echo "Architecture not included"
+                exit 2
+                ;;
+            esac
+
+            install -Dpm0755 -t /app/plugins/DistroAV/extra/bin bin/${_ndi_arch}/ndi*
+            install -Dpm0755 -t /app/plugins/DistroAV/extra/lib lib/${_ndi_arch}/libndi.so*
+
+            rm -rf Install_NDI_SDK_v5_Linux.tar.gz
   - name: metadata
     buildsystem: simple
     build-commands:
